@@ -736,6 +736,9 @@ function setupHtmlEvents() {
     let statsBtn = document.getElementById('statsBtn');
     statsBtn.addEventListener('click', statsClicked);
 
+    let transmitterBtn = document.getElementById('transmitterBtn');
+    transmitterBtn.addEventListener('click', transmitterClicked);
+
     let controlBtn = document.getElementById('control-tgl');
     controlBtn.addEventListener('change', toggleControlScheme);
 
@@ -2466,37 +2469,163 @@ function registerKeyboardEvents() {
     };
 }
 
-function settingsClicked( /* e */ ) {
+function settingsClicked( /* e */) {
     /**
-     * Toggle settings panel. If stats panel is already open, close it and then open settings
+     * Toggle settings panel. If stats or transmitter panel is already open, close it and then open settings
      */
     let settings = document.getElementById('settings-panel');
     let stats = document.getElementById('stats-panel');
+    let transmitters = document.getElementById('wirelesstx-panel');
 
-    if(stats.classList.contains("panel-wrap-visible"))
-    {
+    if (stats.classList.contains("panel-wrap-visible")) {
         stats.classList.toggle("panel-wrap-visible");
+    } else if (transmitters.classList.contains("panel-wrap-visible")) {
+        transmitters.classList.toggle("panel-wrap-visible");
     }
 
     settings.classList.toggle("panel-wrap-visible");
 }
 
-function statsClicked( /* e */ ) {
+function statsClicked( /* e */) {
     /**
-     * Toggle stats panel. If settings panel is already open, close it and then open stats
+     * Toggle stats panel. If settings or transmitter panel is already open, close it and then open stats
      */
     let settings = document.getElementById('settings-panel');
     let stats = document.getElementById('stats-panel');
+    let transmitters = document.getElementById('wirelesstx-panel');
 
-    if(settings.classList.contains("panel-wrap-visible"))
-    {
+    if (settings.classList.contains("panel-wrap-visible")) {
         settings.classList.toggle("panel-wrap-visible");
+    } else if (transmitters.classList.contains("panel-wrap-visible")) {
+        transmitters.classList.toggle("panel-wrap-visible");
     }
 
     stats.classList.toggle("panel-wrap-visible");
 }
 
+function transmitterClicked( /* e */) {
+    /**
+     * Toggle transmitter panel. If settings or stats panel is already open, close it and then open transmitters
+     */
+    let settings = document.getElementById('settings-panel');
+    let stats = document.getElementById('stats-panel');
+    let transmitters = document.getElementById('wirelesstx-panel');
 
+    if (settings.classList.contains("panel-wrap-visible")) {
+        settings.classList.toggle("panel-wrap-visible");
+    } else if (stats.classList.contains("panel-wrap-visible")) {
+        stats.classList.toggle("panel-wrap-visible");
+    }
+
+    transmitters.classList.toggle("panel-wrap-visible");
+    if (transmitters.classList.contains("panel-wrap-visible")) {
+        // If user modifies the transmitter settings then does not click 'apply', 
+        // the next time the panel is open it should be reset.
+        setupTransmitters();
+    }
+}
+
+function setupTransmitters() {
+    /**
+     * Notify the UE app to send setup data for transmitters in this level.
+     */
+    let descriptor = {
+        StartTransmitter: "True"
+    };
+    emitUIInteraction(descriptor);
+    console.log(descriptor);
+}
+
+function addTransmitterClicked() {
+    /**
+     * Notify the UE app that a new WirelessTX should be created.
+     */
+    let descriptor = {
+        ActorToAdd: "WirelessTX"
+    };
+    emitUIInteraction(descriptor);
+    console.log(descriptor);
+}
+
+function updateTransmitterLocation(id) {
+    /**
+     * Notify the UE app to update the location of the transmitter.
+     */
+    console.log(id);
+    let txX = document.getElementById(id + "X");
+    let txY = document.getElementById(id + "Y");
+    let txZ = document.getElementById(id + "Z");
+    let descriptor = {
+        TransmitterToMove: id,
+        X: txX.value,
+        Y: txY.value,
+        Z: txZ.value
+    };
+    emitUIInteraction(descriptor);
+    console.log(descriptor);
+}
+
+function handlePixelStreamingResponse(data) {
+    /**
+     * Use the Pixel Streaming response to set up the transmitter UI.
+     */
+    console.log(data);
+    let txList = JSON.parse(data);
+    let txSection = document.getElementById('txLocation');
+    txSection.innerHTML = '';
+
+    // For each of the transmitters in the level, show their name and coordinates.
+    for (const tx of txList.WirelessTXs) {
+        let txName = tx.Name;
+
+        let txHeader = document.createElement('div');
+        txHeader.id = txName + 'Header';
+        txHeader.className = 'settings-text';
+        txHeader.innerText = txName;
+
+        let txContainer = document.createElement('div');
+        txContainer.id = txName + 'ParamsContainer';
+        txContainer.className = 'collapse';
+
+        let txForm = document.createElement('div');
+        txForm.className = 'form-group';
+
+        // Display the transmitter's coordinates.
+        let coords = { "X": tx.X, "Y": tx.Y, "Z": tx.Z };
+        for (const key in coords) {
+            let txCoord = document.createElement('input');
+            txCoord.type = 'number';
+            txCoord.className = 'form-control';
+            txCoord.id = txName + key;
+            txCoord.value = coords[key];
+
+            let txCoordLabel = document.createElement('label');
+            txCoordLabel.htmlFor = txName + key;
+            txCoordLabel.innerText = key + " Coord";
+
+            txForm.appendChild(txCoordLabel);
+            txForm.appendChild(txCoord);
+        }
+
+        let br = document.createElement('br');
+
+        // Add the button to update each transmitter's location.
+        let txSubmit = document.createElement('input');
+        txSubmit.id = txName;
+        txSubmit.type = 'button';
+        txSubmit.value = 'Apply';
+        txSubmit.onclick = function (event) {
+            updateTransmitterLocation(this.id);
+        }
+        
+        txForm.appendChild(br);
+        txForm.appendChild(txSubmit);
+        txContainer.appendChild(txForm);
+
+        txSection.appendChild(txHeader);
+        txSection.appendChild(txContainer);
+    }
+}
 
 function start(isReconnection) {
     // update "quality status" to "disconnected" state
@@ -2729,6 +2858,8 @@ function load() {
     setupFreezeFrameOverlay();
     registerKeyboardEvents();
     // Example response event listener that logs to console
-    addResponseEventListener('logListener', (response) => {console.log(`Received response message from streamer: "${response}"`)})
+    addResponseEventListener('logListener', (response) => { console.log(`Received response message from streamer: "${response}"`) });
+    // Add response event listener that listens for Pixel Streaming responses
+    addResponseEventListener('handle_responses', handlePixelStreamingResponse);
     start(false);
 }

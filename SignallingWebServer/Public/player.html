@@ -47,7 +47,15 @@
 					<object data="images/Info.svg" type="image/svg+xml"></object>
 					<span class="tooltiptext">Information</span>
 				</button>
-				
+				<button class="tooltip" id="addTransmitterBtn" onclick="addTransmitterClicked()">
+					<object data="images/Info.svg" type="image/svg+xml"></object>
+					<span class="tooltiptext">Add Transmitter</span>
+				</button>
+				<button class="tooltip" id="transmitterBtn">
+					<object data="images/Info.svg" type="image/svg+xml"></object>
+					<span class="tooltiptext">Transmitters</span>
+				</button>
+
 			</div>
 			<div id="unrealengine">
 				<p></p>
@@ -268,6 +276,24 @@
 							</div>
 							<div id="latencyStatsContainer" class="statsContainer">
 								<div id=LatencyStats class="stats">No report yet</div>
+							</div>
+						</section>
+					</div>
+				</div>
+			</div>
+			<div class="panel-wrap" id="wirelesstx-panel">
+				<div class="panel">
+					<div id="heading">WirelessTXs</div>
+					<div id="close" onclick="transmitterClicked()"></div>
+					<div id="content">
+						<section id="txLocation">
+						</section>
+						<section id="txAdd">
+							<div id="txAddDiv" class="setting">
+								<label class="btn-overlay">
+									<input type="button" id="addTransmitterBtn" class="overlay-button btn-flat" onclick="addTransmitterClicked()"
+										   value="Add Transmitter">
+								</label>
 							</div>
 						</section>
 					</div>
