@@ -269,7 +269,7 @@ img#playButton{
 	padding: 0 0 0 2rem;
 }
 
-#close {
+.close {
 	margin: 0.5rem;
 	padding-top: 0.5rem;
 	padding-bottom: 0.5rem;
@@ -278,13 +278,13 @@ img#playButton{
 	float: right;
 }
 
-#close:after {
+.close:after {
 	padding-left: 0.5rem;
 	display: inline-block;
 	content: "\00d7"; /* This will render the 'X' */
 }
 
-#close:hover {
+.close:hover {
 	color: var(--colour3);
 	transition: ease 0.3s;
 }
@@ -464,13 +464,14 @@ input {
 /* Flat buttons */
 input[type="button"] {
 	background-color: transparent;
-    color: var(--colour2);
-    font-family: 'Montserrat';
-    border: 3px solid var(--colour3);
-    border-radius: 1rem;
-    font-size: 0.75rem;
+	color: var(--colour2);
+	font-family: 'Montserrat';
+	border: 3px solid var(--colour3);
+	border-radius: 1rem;
+	font-size: 0.75rem;
 	padding-left: 0.5rem;
 	padding-right: 0.5rem;
+	text-align: center;
 }
 
 input[type="button"]:hover {
@@ -479,11 +480,6 @@ input[type="button"]:hover {
 }
 input[type="button"]:active {
 	background-color: transparent;
-}
-
-#encoder-params-submit,
-#webrtc-params-submit {
-	text-align: center;
 }
 
 select,

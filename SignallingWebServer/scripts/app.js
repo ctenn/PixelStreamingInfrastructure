@@ -730,14 +730,45 @@ function setupHtmlEvents() {
     document.addEventListener('fullscreenchange', onFullscreenChange, false);
     document.addEventListener('MSFullscreenChange', onFullscreenChange, false);
 
+    let settings = document.getElementById('settings-panel');
     let settingsBtn = document.getElementById('settingsBtn');
-    settingsBtn.addEventListener('click', settingsClicked);
+    let settingsClose = document.getElementById('settings-close');
+    settingsBtn.addEventListener('click', function () {
+        panelClicked(settings);
+    });
+    settingsClose.addEventListener('click', function () {
+        panelClicked(settings);
+    });
 
+    let stats = document.getElementById('stats-panel');
     let statsBtn = document.getElementById('statsBtn');
-    statsBtn.addEventListener('click', statsClicked);
+    let statsClose = document.getElementById('stats-close');
+    statsBtn.addEventListener('click', function () {
+        panelClicked(stats);
+    });
+    statsClose.addEventListener('click', function () {
+        panelClicked(stats);
+    });
 
+    let transmitters = document.getElementById('wirelesstx-panel');
     let transmitterBtn = document.getElementById('transmitterBtn');
-    transmitterBtn.addEventListener('click', transmitterClicked);
+    let transmitterClose = document.getElementById('tx-close');
+    transmitterBtn.addEventListener('click', function () {
+        panelClicked(transmitters);
+    });
+    transmitterClose.addEventListener('click', function () {
+        panelClicked(transmitters);
+    });
+
+    let levels = document.getElementById('level-panel');
+    let levelBtn = document.getElementById('levelBtn');
+    let levelClose = document.getElementById('level-close');
+    levelBtn.addEventListener('click', function () {
+        panelClicked(levels);
+    });
+    levelClose.addEventListener('click', function () {
+        panelClicked(levels);
+    });
 
     let controlBtn = document.getElementById('control-tgl');
     controlBtn.addEventListener('change', toggleControlScheme);
@@ -2469,56 +2500,25 @@ function registerKeyboardEvents() {
     };
 }
 
-function settingsClicked( /* e */) {
+function panelClicked(panel) {
     /**
-     * Toggle settings panel. If stats or transmitter panel is already open, close it and then open settings
+     * Toggle panel. If another panel is already open, close it and then open the clicked panel.
      */
     let settings = document.getElementById('settings-panel');
     let stats = document.getElementById('stats-panel');
     let transmitters = document.getElementById('wirelesstx-panel');
+    let levels = document.getElementById('level-panel');
 
-    if (stats.classList.contains("panel-wrap-visible")) {
-        stats.classList.toggle("panel-wrap-visible");
-    } else if (transmitters.classList.contains("panel-wrap-visible")) {
-        transmitters.classList.toggle("panel-wrap-visible");
+    let panels = [settings, stats, transmitters, levels];
+
+    for (let cur of panels) {
+        if (cur != panel && cur.classList.contains("panel-wrap-visible")) {
+            cur.classList.toggle("panel-wrap-visible");
+        }
     }
 
-    settings.classList.toggle("panel-wrap-visible");
-}
-
-function statsClicked( /* e */) {
-    /**
-     * Toggle stats panel. If settings or transmitter panel is already open, close it and then open stats
-     */
-    let settings = document.getElementById('settings-panel');
-    let stats = document.getElementById('stats-panel');
-    let transmitters = document.getElementById('wirelesstx-panel');
-
-    if (settings.classList.contains("panel-wrap-visible")) {
-        settings.classList.toggle("panel-wrap-visible");
-    } else if (transmitters.classList.contains("panel-wrap-visible")) {
-        transmitters.classList.toggle("panel-wrap-visible");
-    }
-
-    stats.classList.toggle("panel-wrap-visible");
-}
-
-function transmitterClicked( /* e */) {
-    /**
-     * Toggle transmitter panel. If settings or stats panel is already open, close it and then open transmitters
-     */
-    let settings = document.getElementById('settings-panel');
-    let stats = document.getElementById('stats-panel');
-    let transmitters = document.getElementById('wirelesstx-panel');
-
-    if (settings.classList.contains("panel-wrap-visible")) {
-        settings.classList.toggle("panel-wrap-visible");
-    } else if (stats.classList.contains("panel-wrap-visible")) {
-        stats.classList.toggle("panel-wrap-visible");
-    }
-
-    transmitters.classList.toggle("panel-wrap-visible");
-    if (transmitters.classList.contains("panel-wrap-visible")) {
+    panel.classList.toggle("panel-wrap-visible");
+    if (panel == transmitters && transmitters.classList.contains("panel-wrap-visible")) {
         // If user modifies the transmitter settings then does not click 'apply', 
         // the next time the panel is open it should be reset.
         setupTransmitters();
@@ -2555,6 +2555,12 @@ function updateTransmitterLocation(id) {
     let txX = document.getElementById(id + "X");
     let txY = document.getElementById(id + "Y");
     let txZ = document.getElementById(id + "Z");
+
+    // Validate that the coordinates are positive or negative floating points.
+    if (isNaN(parseFloat(txX.value)) || isNaN(parseFloat(txY.value)) || isNaN(parseFloat(txZ.value))) {
+        alert("Please enter valid numbers.");
+    }
+
     let descriptor = {
         TransmitterToMove: id,
         X: txX.value,
@@ -2562,6 +2568,31 @@ function updateTransmitterLocation(id) {
         Z: txZ.value
     };
     emitUIInteraction(descriptor);
+    console.log(descriptor);
+}
+
+function selectTransmitter(id) {
+    /**
+     * Notify the UE app that this transmitter has been selected.
+     */
+    console.log(id);
+    let descriptor = {
+        TransmitterToSelect: id
+    };
+    emitUIInteraction(descriptor);
+    console.log(descriptor);
+}
+
+function changeLevel() {
+    let levels = document.getElementById("level-select");
+    let selectedLevel = levels.options[levels.selectedIndex].text;
+    console.log(selectedLevel);
+
+    let descriptor = {
+        NewLevel: selectedLevel
+    };
+    emitUIInteraction(descriptor);
+
     console.log(descriptor);
 }
 
@@ -2582,6 +2613,10 @@ function handlePixelStreamingResponse(data) {
         txHeader.id = txName + 'Header';
         txHeader.className = 'settings-text';
         txHeader.innerText = txName;
+        // TODO: Update CSS so that selection is clearer OR use accordion UI elements
+        txHeader.onclick = function (event) {
+            selectTransmitter(this.id.substring(0, this.id.indexOf("Header")));
+        }
 
         let txContainer = document.createElement('div');
         txContainer.id = txName + 'ParamsContainer';

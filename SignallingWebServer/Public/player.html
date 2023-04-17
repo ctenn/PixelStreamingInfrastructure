@@ -47,15 +47,14 @@
 					<object data="images/Info.svg" type="image/svg+xml"></object>
 					<span class="tooltiptext">Information</span>
 				</button>
-				<button class="tooltip" id="addTransmitterBtn" onclick="addTransmitterClicked()">
-					<object data="images/Info.svg" type="image/svg+xml"></object>
-					<span class="tooltiptext">Add Transmitter</span>
-				</button>
 				<button class="tooltip" id="transmitterBtn">
-					<object data="images/Info.svg" type="image/svg+xml"></object>
+					<object data="images/TX.svg" type="image/svg+xml"></object>
 					<span class="tooltiptext">Transmitters</span>
 				</button>
-
+				<button class="tooltip" id="levelBtn">
+					<object data="images/Lvl.svg" type="image/svg+xml"></object>
+					<span class="tooltiptext">Levels</span>
+				</button>
 			</div>
 			<div id="unrealengine">
 				<p></p>
@@ -90,7 +89,7 @@
 			<div class="panel-wrap" id="settings-panel">
 				<div class="panel">
 					<div id="heading">Settings</div>
-					<div id="close" onclick="settingsClicked()"></div>
+					<div class="close" id="settings-close"></div>
 					<div id="content">
 						<div id="fillWindow" class="setting">
 							<div class="settings-text">Enlarge display to fill window</div>
@@ -253,8 +252,8 @@
 			<div class="panel-wrap" id="stats-panel">
 				<div class="panel">
 					<div id="heading">Information</div>
-					<div id="close" onclick="statsClicked()"></div>
-					<div id="content">		
+					<div class="close" id="stats-close"></div>
+					<div id="content">
 						<section id="statsPanel">
 							<div class="setting settings-text">
 								<div>Session Stats</div>
@@ -284,7 +283,7 @@
 			<div class="panel-wrap" id="wirelesstx-panel">
 				<div class="panel">
 					<div id="heading">WirelessTXs</div>
-					<div id="close" onclick="transmitterClicked()"></div>
+					<div class="close" id="tx-close"></div>
 					<div id="content">
 						<section id="txLocation">
 						</section>
@@ -294,6 +293,30 @@
 									<input type="button" id="addTransmitterBtn" class="overlay-button btn-flat" onclick="addTransmitterClicked()"
 										   value="Add Transmitter">
 								</label>
+							</div>
+						</section>
+					</div>
+				</div>
+			</div>
+			<div class="panel-wrap" id="level-panel">
+				<div class="panel">
+					<div id="heading">Levels</div>
+					<div class="close" id="level-close"></div>
+					<div id="content">
+						<section id="levelSettings">
+							<div id="levelSettingsHeader" class="settings-text">
+								<div>Change Level</div>
+							</div>
+							<div id="levelSettingsContainer" class="collapse">
+								<div class="form-group">
+									<div class="settings-text">New Level</div>
+									<select class="form-control" id="level-select">
+										<option>DemoOffice_30mx30m</option>
+										<option>TestLevel</option>
+									</select>
+									<br />
+									<input class="overlay-button btn-flat" type="button" value="Apply" onclick="changeLevel()">
+								</div>
 							</div>
 						</section>
 					</div>
