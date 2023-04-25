@@ -2613,7 +2613,6 @@ function handlePixelStreamingResponse(data) {
         txHeader.id = txName + 'Header';
         txHeader.className = 'settings-text';
         txHeader.innerText = txName;
-        // TODO: Update CSS so that selection is clearer OR use accordion UI elements
         txHeader.onclick = function (event) {
             selectTransmitter(this.id.substring(0, this.id.indexOf("Header")));
         }
