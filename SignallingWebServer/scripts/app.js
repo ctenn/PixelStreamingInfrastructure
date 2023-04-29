@@ -710,6 +710,31 @@ function parseURLParams() {
     inputOptions.hideBrowserCursor = (urlParams.has('hideBrowserCursor') ?  true : false);
 }
 
+function setupPanels() {
+    let controls = ['settings', 'stats', 'transmitter', 'level', 'mobile'];
+
+    for (const control of controls) {
+        let panel = document.getElementById(control + '-panel');
+        let btn = document.getElementById(control + 'Btn');
+        let close = document.getElementById(control + '-close');
+        btn.addEventListener('click', function () {
+            panelClicked(panel);
+        });
+        close.addEventListener('click', function () {
+            panelClicked(panel);
+        });
+    }
+
+    let addTransmitterBtn = document.getElementById('addTransmitterBtn');
+    addTransmitterBtn.addEventListener('click', function () {
+        addActorClicked(Actors.WirelessTX);
+    });
+
+    let addMobileTwinBtn = document.getElementById('addMobileTwinBtn');
+    addMobileTwinBtn.addEventListener('click', function () {
+        addActorClicked(Actors.MobileTwin);
+    });
+}
 
 function setupHtmlEvents() {
     //Window events
@@ -730,63 +755,7 @@ function setupHtmlEvents() {
     document.addEventListener('fullscreenchange', onFullscreenChange, false);
     document.addEventListener('MSFullscreenChange', onFullscreenChange, false);
 
-    let settings = document.getElementById('settings-panel');
-    let settingsBtn = document.getElementById('settingsBtn');
-    let settingsClose = document.getElementById('settings-close');
-    settingsBtn.addEventListener('click', function () {
-        panelClicked(settings);
-    });
-    settingsClose.addEventListener('click', function () {
-        panelClicked(settings);
-    });
-
-    let stats = document.getElementById('stats-panel');
-    let statsBtn = document.getElementById('statsBtn');
-    let statsClose = document.getElementById('stats-close');
-    statsBtn.addEventListener('click', function () {
-        panelClicked(stats);
-    });
-    statsClose.addEventListener('click', function () {
-        panelClicked(stats);
-    });
-
-    let transmitters = document.getElementById('wirelesstx-panel');
-    let transmitterBtn = document.getElementById('transmitterBtn');
-    let transmitterClose = document.getElementById('tx-close');
-    transmitterBtn.addEventListener('click', function () {
-        panelClicked(transmitters);
-    });
-    transmitterClose.addEventListener('click', function () {
-        panelClicked(transmitters);
-    });
-    let addTransmitterBtn = document.getElementById('addTransmitterBtn');
-    addTransmitterBtn.addEventListener('click', function () {
-        addActorClicked(Actors.WirelessTX);
-    });
-
-    let levels = document.getElementById('level-panel');
-    let levelBtn = document.getElementById('levelBtn');
-    let levelClose = document.getElementById('level-close');
-    levelBtn.addEventListener('click', function () {
-        panelClicked(levels);
-    });
-    levelClose.addEventListener('click', function () {
-        panelClicked(levels);
-    });
-
-    let mobile = document.getElementById('mobile-panel');
-    let mobileBtn = document.getElementById('mobileBtn');
-    let mobileClose = document.getElementById('mobile-close');
-    mobileBtn.addEventListener('click', function () {
-        panelClicked(mobile);
-    });
-    mobileClose.addEventListener('click', function () {
-        panelClicked(mobile);
-    });
-    let addMobileTwinBtn = document.getElementById('addMobileTwinBtn');
-    addMobileTwinBtn.addEventListener('click', function () {
-        addActorClicked(Actors.MobileTwin);
-    });
+    setupPanels();
 
     let controlBtn = document.getElementById('control-tgl');
     controlBtn.addEventListener('change', toggleControlScheme);
@@ -2522,13 +2491,7 @@ function panelClicked(panel) {
     /**
      * Toggle panel. If another panel is already open, close it and then open the clicked panel.
      */
-    let settings = document.getElementById('settings-panel');
-    let stats = document.getElementById('stats-panel');
-    let transmitters = document.getElementById('wirelesstx-panel');
-    let levels = document.getElementById('level-panel');
-    let mobile = document.getElementById('mobile-panel');
-
-    let panels = [settings, stats, transmitters, levels, mobile];
+    let panels = document.getElementsByClassName('panel-wrap');
 
     for (let cur of panels) {
         if (cur != panel && cur.classList.contains("panel-wrap-visible")) {
@@ -2537,11 +2500,11 @@ function panelClicked(panel) {
     }
 
     panel.classList.toggle("panel-wrap-visible");
-    if (panel == transmitters && transmitters.classList.contains("panel-wrap-visible")) {
+    if (panel.id == 'transmitter-panel' && panel.classList.contains("panel-wrap-visible")) {
         // If user modifies the transmitter settings then does not click 'apply', 
         // the next time the panel is open it should be reset.
         setupActorUI(Actors.WirelessTX);
-    } else if (panel == mobile && mobile.classList.contains("panel-wrap-visible")) {
+    } else if (panel.id == 'mobile-panel' && panel.classList.contains("panel-wrap-visible")) {
         // If user modifies the mobile settings then does not click 'apply', 
         // the next time the panel is open it should be reset.
         setupActorUI(Actors.MobileTwin);
