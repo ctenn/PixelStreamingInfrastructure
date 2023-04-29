@@ -475,12 +475,15 @@ input[type="button"] {
 	text-align: center;
 }
 
-input[type="button"]:hover {
+input[type="button"]:hover:not([disabled]) {
 	background-color: var(--colour3);
 	transition: ease 0.3s;
 }
 input[type="button"]:active {
 	background-color: transparent;
+}
+input[type="button"]:disabled {
+	opacity: 0.5;
 }
 
 select,

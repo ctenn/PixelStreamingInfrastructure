@@ -55,6 +55,10 @@
 					<object data="images/Lvl.svg" type="image/svg+xml"></object>
 					<span class="tooltiptext">Levels</span>
 				</button>
+				<button class="tooltip" id="mobileBtn">
+					<object data="images/Lvl.svg" type="image/svg+xml"></object>
+					<span class="tooltiptext">MobileTwin</span>
+				</button>
 			</div>
 			<div id="unrealengine">
 				<p></p>
@@ -317,6 +321,24 @@
 									<br />
 									<input class="overlay-button btn-flat" type="button" value="Apply" onclick="changeLevel()">
 								</div>
+							</div>
+						</section>
+					</div>
+				</div>
+			</div>
+			<div class="panel-wrap" id="mobile-panel">
+				<div class="panel">
+					<div id="heading">MobileTwin</div>
+					<div class="close" id="mobile-close"></div>
+					<div id="content">
+						<section id="mobileTwinLocation">
+						</section>
+						<section id="mobileTwinAdd">
+							<div id="mobileTwinAddDiv" class="setting">
+								<label class="btn-overlay">
+									<input type="button" id="addMobileTwinBtn" class="overlay-button btn-flat" onclick="addMobileTwinClicked()"
+										   value="Add Mobile Twin">
+								</label>
 							</div>
 						</section>
 					</div>

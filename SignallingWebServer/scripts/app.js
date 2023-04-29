@@ -770,6 +770,16 @@ function setupHtmlEvents() {
         panelClicked(levels);
     });
 
+    let mobile = document.getElementById('mobile-panel');
+    let mobileBtn = document.getElementById('mobileBtn');
+    let mobileClose = document.getElementById('mobile-close');
+    mobileBtn.addEventListener('click', function () {
+        panelClicked(mobile);
+    });
+    mobileClose.addEventListener('click', function () {
+        panelClicked(mobile);
+    });
+
     let controlBtn = document.getElementById('control-tgl');
     controlBtn.addEventListener('change', toggleControlScheme);
 
@@ -2508,8 +2518,9 @@ function panelClicked(panel) {
     let stats = document.getElementById('stats-panel');
     let transmitters = document.getElementById('wirelesstx-panel');
     let levels = document.getElementById('level-panel');
+    let mobile = document.getElementById('mobile-panel');
 
-    let panels = [settings, stats, transmitters, levels];
+    let panels = [settings, stats, transmitters, levels, mobile];
 
     for (let cur of panels) {
         if (cur != panel && cur.classList.contains("panel-wrap-visible")) {
@@ -2522,6 +2533,10 @@ function panelClicked(panel) {
         // If user modifies the transmitter settings then does not click 'apply', 
         // the next time the panel is open it should be reset.
         setupTransmitters();
+    } else if (panel == mobile && mobile.classList.contains("panel-wrap-visible")) {
+        // If user modifies the mobile settings then does not click 'apply', 
+        // the next time the panel is open it should be reset.
+        setupMobile();
     }
 }
 
@@ -2530,7 +2545,18 @@ function setupTransmitters() {
      * Notify the UE app to send setup data for transmitters in this level.
      */
     let descriptor = {
-        StartTransmitter: "True"
+        Start: "WirelessTX"
+    };
+    emitUIInteraction(descriptor);
+    console.log(descriptor);
+}
+
+function setupMobile() {
+    /**
+     * Notify the UE app to send setup data for mobiles in this level.
+     */
+    let descriptor = {
+        Start: "MobileTwin"
     };
     emitUIInteraction(descriptor);
     console.log(descriptor);
@@ -2547,7 +2573,18 @@ function addTransmitterClicked() {
     console.log(descriptor);
 }
 
-function updateTransmitterLocation(id) {
+function addMobileTwinClicked() {
+    /**
+     * Notify the UE app that a new MobileTwin should be created.
+     */
+    let descriptor = {
+        ActorToAdd: "MobileTwin"
+    };
+    emitUIInteraction(descriptor);
+    console.log(descriptor);
+}
+
+function updateActorLocation(id, type) {
     /**
      * Notify the UE app to update the location of the transmitter.
      */
@@ -2562,7 +2599,8 @@ function updateTransmitterLocation(id) {
     }
 
     let descriptor = {
-        TransmitterToMove: id,
+        ActorToMove: id,
+        ActorType: type,
         X: txX.value,
         Y: txY.value,
         Z: txZ.value
@@ -2596,68 +2634,111 @@ function changeLevel() {
     console.log(descriptor);
 }
 
-function handlePixelStreamingResponse(data) {
+function createActorUI(actorSection, actor) {
+    let actorName = actor.Name;
+
+    let actorHeader = document.createElement('div');
+    actorHeader.id = actorName + 'Header';
+    actorHeader.className = 'settings-text';
+    actorHeader.innerText = actorName;
+
+    let actorContainer = document.createElement('div');
+    actorContainer.id = actorName + 'ParamsContainer';
+    actorContainer.className = 'collapse';
+
+    let actorForm = document.createElement('div');
+    actorForm.className = 'form-group';
+
+    // Display the transmitter's coordinates.
+    let coords = { "X": actor.X, "Y": actor.Y, "Z": actor.Z };
+    for (const key in coords) {
+        let actorCoord = document.createElement('input');
+        actorCoord.type = 'number';
+        actorCoord.className = 'form-control';
+        actorCoord.id = actorName + key;
+        actorCoord.value = coords[key];
+
+        let actorCoordLabel = document.createElement('label');
+        actorCoordLabel.htmlFor = actorName + key;
+        actorCoordLabel.innerText = key + " Coord";
+
+        actorForm.appendChild(actorCoordLabel);
+        actorForm.appendChild(actorCoord);
+    }
+
+    let br = document.createElement('br');
+
+    // Add the button to update each transmitter's location.
+    let actorSubmit = document.createElement('input');
+    actorSubmit.id = actorName;
+    actorSubmit.type = 'button';
+    actorSubmit.value = 'Apply';
+
+    actorForm.appendChild(br);
+    actorForm.appendChild(actorSubmit);
+    actorContainer.appendChild(actorForm);
+
+    actorSection.appendChild(actorHeader);
+    actorSection.appendChild(actorContainer);
+}
+
+function initTransmitterUI(data) {
     /**
      * Use the Pixel Streaming response to set up the transmitter UI.
      */
-    console.log(data);
-    let txList = JSON.parse(data);
     let txSection = document.getElementById('txLocation');
     txSection.innerHTML = '';
 
     // For each of the transmitters in the level, show their name and coordinates.
-    for (const tx of txList.WirelessTXs) {
-        let txName = tx.Name;
+    for (const tx of data.WirelessTXs) {
+        createActorUI(txSection, tx);
 
-        let txHeader = document.createElement('div');
-        txHeader.id = txName + 'Header';
-        txHeader.className = 'settings-text';
-        txHeader.innerText = txName;
+        let txSubmit = document.getElementById(tx.Name);
+        txSubmit.onclick = function (event) {
+            updateActorLocation(this.id, 'WirelessTX'); // enum?
+        }
+
+        let txHeader = document.getElementById(tx.Name + 'Header');
         txHeader.onclick = function (event) {
             selectTransmitter(this.id.substring(0, this.id.indexOf("Header")));
         }
+    }
+}
 
-        let txContainer = document.createElement('div');
-        txContainer.id = txName + 'ParamsContainer';
-        txContainer.className = 'collapse';
+function initMobileUI(data) {
+    /**
+     * Use the Pixel Streaming response to set up the mobile UI.
+     */
+    let mobileSection = document.getElementById('mobileTwinLocation');
+    mobileSection.innerHTML = '';
 
-        let txForm = document.createElement('div');
-        txForm.className = 'form-group';
+    mobile = data.MobileTwin;
 
-        // Display the transmitter's coordinates.
-        let coords = { "X": tx.X, "Y": tx.Y, "Z": tx.Z };
-        for (const key in coords) {
-            let txCoord = document.createElement('input');
-            txCoord.type = 'number';
-            txCoord.className = 'form-control';
-            txCoord.id = txName + key;
-            txCoord.value = coords[key];
+    let mobileAdd = document.getElementById('addMobileTwinBtn');
 
-            let txCoordLabel = document.createElement('label');
-            txCoordLabel.htmlFor = txName + key;
-            txCoordLabel.innerText = key + " Coord";
+    // If there is no mobile data, enable the mobile Add button
+    if (JSON.stringify(mobile) === JSON.stringify({})) {
+        mobileAdd.disabled = false;
+        return;
+    }
 
-            txForm.appendChild(txCoordLabel);
-            txForm.appendChild(txCoord);
-        }
+    // Otherwise, create the mobile location UI and disable the mobile Add button
+    createActorUI(mobileSection, mobile);
 
-        let br = document.createElement('br');
+    let mobileSubmit = document.getElementById(mobile.Name);
+    mobileSubmit.onclick = function (event) {
+        updateActorLocation(this.id, 'MobileTwin');
+    }
 
-        // Add the button to update each transmitter's location.
-        let txSubmit = document.createElement('input');
-        txSubmit.id = txName;
-        txSubmit.type = 'button';
-        txSubmit.value = 'Apply';
-        txSubmit.onclick = function (event) {
-            updateTransmitterLocation(this.id);
-        }
-        
-        txForm.appendChild(br);
-        txForm.appendChild(txSubmit);
-        txContainer.appendChild(txForm);
+    mobileAdd.disabled = true;
+}
 
-        txSection.appendChild(txHeader);
-        txSection.appendChild(txContainer);
+function handlePixelStreamingResponse(data) {
+    let jsonData = JSON.parse(data);
+    if (jsonData.hasOwnProperty('WirelessTXs')) {
+        initTransmitterUI(jsonData);
+    } else if (jsonData.hasOwnProperty('MobileTwin')) {
+        initMobileUI(jsonData);
     }
 }
 
