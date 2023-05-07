@@ -1,0 +1,10 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+		viewBox="0 0 1280 1280" style="enable-background:new 0 0 1280 1280;" xml:space="preserve">
+	<defs>
+		<link href="../player.css" type="text/css" rel="stylesheet"
+            xmlns="http://www.w3.org/1999/xhtml"/>
+	</defs>
+	<g>
+		<path  d="m299 994q-19 0-32-13-13-13-13-32v-597q0-27 19-46 19-20 46-20h33q20 0 36 12 17 12 25 30l227 566 227-566q8-18 24-30 17-12 37-12h33q27 0 46 20 19 19 19 46v597q0 19-13 32-13 13-32 13-19 0-33-13-13-13-13-32v-568l-231 571q-8 19-26 31-17 11-38 11-21 0-39-11-17-12-25-31l-231-571v568q0 19-14 32-13 13-32 13z"/>
+	</g>
+</svg>
