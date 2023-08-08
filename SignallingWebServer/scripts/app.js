@@ -755,7 +755,10 @@ function setupHtmlEvents() {
     document.addEventListener('fullscreenchange', onFullscreenChange, false);
     document.addEventListener('MSFullscreenChange', onFullscreenChange, false);
 
-    setupPanels();
+    // Only show controls to the controlling player, not to spectators
+    if (document.body.className == "player") {
+        setupPanels();
+    }
 
     let controlBtn = document.getElementById('control-tgl');
     controlBtn.addEventListener('change', toggleControlScheme);
@@ -1390,6 +1393,9 @@ function setupStats(){
     let printInterval = 5 * 60 * 1000; /*Print every 5 minutes*/
     let nextPrintDuration = printInterval;
 
+    // !log latency every 1 second
+    setInterval(sendStartLatencyTest, 1*1000);
+
     webRtcPlayerObj.onAggregatedStats = (aggregatedStats) => {
         let numberFormat = new Intl.NumberFormat(window.navigator.language, {
             maximumFractionDigits: 0
@@ -1508,6 +1514,9 @@ function setupStats(){
         let statsDiv = document.getElementById("stats");
         statsDiv.innerHTML = statsText;
 
+        // !logging code
+        console.log(new Date().toLocaleString(), statsText);
+
         if (print_stats) {
             if (aggregatedStats.timestampStart) {
                 if ((aggregatedStats.timestamp - aggregatedStats.timestampStart) > nextPrintDuration) {
@@ -1554,6 +1563,9 @@ function setupStats(){
         latencyStatsInnerHTML += browserSideLatency ? `<div>Total browser latency (ms): ${browserSideLatency.toFixed(2)}</div>` : "";
         latencyStatsInnerHTML += endToEndLatency ? `<div>Total latency (ms): ${endToEndLatency.toFixed(2)}</div>` : "";
         document.getElementById("LatencyStats").innerHTML = latencyStatsInnerHTML;
+
+        // !logging code
+        console.log(new Date().toLocaleString(), latencyStatsInnerHTML);
     }
 }
 
@@ -2743,7 +2755,11 @@ function load() {
     registerKeyboardEvents();
     // Example response event listener that logs to console
     addResponseEventListener('logListener', (response) => { console.log(`Received response message from streamer: "${response}"`) });
-    // Add response event listener that listens for Pixel Streaming responses
-    addResponseEventListener('handle_responses', handlePixelStreamingResponse);
+
+    // Add response event listener that listens for Pixel Streaming responses (for players only)
+    if (document.body.className == "player") {
+        addResponseEventListener('handle_responses', handlePixelStreamingResponse);
+    }
+    
     start(false);
 }
